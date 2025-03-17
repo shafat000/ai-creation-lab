@@ -1,11 +1,13 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Github, LogIn, UserPlus } from 'lucide-react';
+import { Github, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const isWelcomePage = location.pathname === '/';
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
   
@@ -23,18 +25,30 @@ const Header = () => {
         
         {showAuthButtons && (
           <div className="flex items-center space-x-2">
-            <Link to="/sign-in">
-              <Button variant="ghost" size="sm" className="flex gap-1 items-center">
-                <LogIn className="h-4 w-4" />
-                <span className="hidden sm:inline-block">Sign In</span>
-              </Button>
-            </Link>
-            <Link to="/sign-up">
-              <Button variant="outline" size="sm" className="flex gap-1 items-center">
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline-block">Sign Up</span>
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm hidden md:inline-block mr-2">Hi, {user.user_metadata.name || user.email}</span>
+                <Button variant="ghost" size="sm" className="flex gap-1 items-center" onClick={() => signOut()}>
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline-block">Sign Out</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/sign-in">
+                  <Button variant="ghost" size="sm" className="flex gap-1 items-center">
+                    <LogIn className="h-4 w-4" />
+                    <span className="hidden sm:inline-block">Sign In</span>
+                  </Button>
+                </Link>
+                <Link to="/sign-up">
+                  <Button variant="outline" size="sm" className="flex gap-1 items-center">
+                    <UserPlus className="h-4 w-4" />
+                    <span className="hidden sm:inline-block">Sign Up</span>
+                  </Button>
+                </Link>
+              </>
+            )}
             <Button variant="ghost" size="icon" className="rounded-full">
               <Github className="h-5 w-5" />
             </Button>

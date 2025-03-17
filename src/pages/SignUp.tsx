@@ -14,8 +14,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
 
 const signUpSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -30,6 +30,7 @@ const signUpSchema = z.object({
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
+  const { signUp, isLoading } = useAuth();
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -42,18 +43,9 @@ const SignUp = () => {
 
   const onSubmit = async (data: SignUpFormValues) => {
     try {
-      // This would be replaced with actual registration logic
-      console.log('Sign up with:', data);
-      toast({
-        title: 'Sign Up Successful',
-        description: 'Your account has been created.',
-      });
+      await signUp(data.email, data.password, data.name);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to sign up. Please try again.',
-        variant: 'destructive',
-      });
+      console.error('Sign up error:', error);
     }
   };
 
@@ -127,8 +119,8 @@ const SignUp = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                Sign Up
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Creating account...' : 'Sign Up'}
               </Button>
             </form>
           </Form>

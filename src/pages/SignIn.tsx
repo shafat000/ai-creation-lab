@@ -14,8 +14,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -25,6 +25,7 @@ const signInSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
+  const { signIn, isLoading } = useAuth();
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -35,18 +36,9 @@ const SignIn = () => {
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
-      // This would be replaced with actual authentication logic
-      console.log('Sign in with:', data);
-      toast({
-        title: 'Sign In Successful',
-        description: 'Welcome back!',
-      });
+      await signIn(data.email, data.password);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to sign in. Please try again.',
-        variant: 'destructive',
-      });
+      console.error('Sign in error:', error);
     }
   };
 
@@ -92,8 +84,8 @@ const SignIn = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
           </Form>
