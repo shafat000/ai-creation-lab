@@ -50,17 +50,20 @@ const DataManagement = () => {
       
       if (error) throw error;
       
-      // First check if data exists and is an array before trying to cast
+      // Using unknown as an intermediary type to safely handle the conversion
       if (data && Array.isArray(data)) {
-        // Verify each object in the array has the required Note properties
-        const validNotes = data.filter((item: any) => 
-          typeof item === 'object' && 
-          'id' in item && 
-          'user_id' in item && 
-          'title' in item && 
-          'content' in item && 
+        const safeData = data as unknown[]; // First cast to unknown array
+        
+        // Then filter and validate each item before casting to Note[]
+        const validNotes = safeData.filter((item): item is Note => 
+          item !== null &&
+          typeof item === 'object' &&
+          'id' in item &&
+          'user_id' in item &&
+          'title' in item &&
+          'content' in item &&
           'created_at' in item
-        ) as Note[];
+        );
         
         setNotes(validNotes);
       } else {
