@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { database, storage } from '@/lib/supabase';
@@ -48,10 +49,20 @@ const DataManagement = () => {
       });
       
       if (error) throw error;
-      // Fix the type error by ensuring we only set data if it exists and is an array
-      // Also make sure it matches the Note type
+      
+      // First check if data exists and is an array before trying to cast
       if (data && Array.isArray(data)) {
-        setNotes(data as Note[]);
+        // Verify each object in the array has the required Note properties
+        const validNotes = data.filter((item: any) => 
+          typeof item === 'object' && 
+          'id' in item && 
+          'user_id' in item && 
+          'title' in item && 
+          'content' in item && 
+          'created_at' in item
+        ) as Note[];
+        
+        setNotes(validNotes);
       } else {
         setNotes([]);
       }
