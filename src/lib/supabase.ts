@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
@@ -12,13 +13,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database helpers
 export const database = {
-  // Fetch data from a table
-  async fetch(table: string, options?: { 
+  // Fetch data from a table with proper typing
+  async fetch<T>(table: string, options?: { 
     columns?: string, 
     filter?: { column: string, value: any },
     limit?: number,
     order?: { column: string, ascending?: boolean }
-  }) {
+  }): Promise<{ data: T[] | null, error: any }> {
     let query = supabase.from(table).select(options?.columns || '*');
     
     if (options?.filter) {
@@ -36,17 +37,19 @@ export const database = {
     }
     
     const { data, error } = await query;
-    return { data, error };
+    return { data: data as T[] | null, error };
   },
   
   // Insert data into a table
-  async insert(table: string, data: any) {
-    return await supabase.from(table).insert(data);
+  async insert<T>(table: string, data: any): Promise<{ data: T | null, error: any }> {
+    const result = await supabase.from(table).insert(data).select();
+    return { data: result.data?.[0] as T || null, error: result.error };
   },
   
   // Update data in a table
-  async update(table: string, data: any, match: { column: string, value: any }) {
-    return await supabase.from(table).update(data).eq(match.column, match.value);
+  async update<T>(table: string, data: any, match: { column: string, value: any }): Promise<{ data: T | null, error: any }> {
+    const result = await supabase.from(table).update(data).eq(match.column, match.value).select();
+    return { data: result.data?.[0] as T || null, error: result.error };
   },
   
   // Delete data from a table

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { database, storage } from '@/lib/supabase';
@@ -44,31 +43,12 @@ const DataManagement = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await database.fetch('notes', {
+      const { data, error } = await database.fetch<Note>('notes', {
         filter: { column: 'user_id', value: user.id }
       });
       
       if (error) throw error;
-      
-      // Using unknown as an intermediary type to safely handle the conversion
-      if (data && Array.isArray(data)) {
-        const safeData = data as unknown[]; // First cast to unknown array
-        
-        // Then filter and validate each item before casting to Note[]
-        const validNotes = safeData.filter((item): item is Note => 
-          item !== null &&
-          typeof item === 'object' &&
-          'id' in item &&
-          'user_id' in item &&
-          'title' in item &&
-          'content' in item &&
-          'created_at' in item
-        );
-        
-        setNotes(validNotes);
-      } else {
-        setNotes([]);
-      }
+      setNotes(data || []);
     } catch (error: any) {
       console.error('Error loading notes:', error);
       toast({
@@ -76,7 +56,6 @@ const DataManagement = () => {
         description: error.message,
         variant: 'destructive',
       });
-      // If there's an error, set notes to empty array
       setNotes([]);
     }
   };
@@ -111,7 +90,7 @@ const DataManagement = () => {
     
     setIsLoading(true);
     try {
-      const { data, error } = await database.insert('notes', {
+      const { error } = await database.insert<Note>('notes', {
         user_id: user.id,
         title: newNote.title,
         content: newNote.content,
