@@ -1,9 +1,11 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
 const supabaseUrl = 'https://xjwnqojroevhcimguown.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqd25xb2pyb2V2aGNpbWd1b3duIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMjcxOTEsImV4cCI6MjA1NzgwMzE5MX0.hdOBBKgU9y-OcND4l_E0fnVkKSGGc95GDfCN5nQCGA4';
+
+// Google API key
+export const GOOGLE_API_KEY = 'AIzaSyASHKFzKYHLATFgMBPgy0BVV-ltr-CI-KA';
 
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -33,7 +35,8 @@ export const database = {
       });
     }
     
-    return await query;
+    const { data, error } = await query;
+    return { data, error };
   },
   
   // Insert data into a table
@@ -80,5 +83,19 @@ export const storage = {
   // List all files in a bucket/folder
   async list(bucket: string, folderPath?: string) {
     return await supabase.storage.from(bucket).list(folderPath || '');
+  }
+};
+
+// Google API helper
+export const googleApi = {
+  async sendQuery(query: string) {
+    try {
+      // This is a placeholder - you'll need to specify which Google API you want to use
+      const response = await fetch(`https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&q=${encodeURIComponent(query)}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Error querying Google API:", error);
+      return { error: true, message: "Failed to query Google API" };
+    }
   }
 };
