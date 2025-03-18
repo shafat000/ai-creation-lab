@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { database, storage } from '@/lib/supabase';
@@ -49,7 +48,13 @@ const DataManagement = () => {
       });
       
       if (error) throw error;
-      setNotes(data || []);
+      // Fix the type error by ensuring we only set data if it exists and is an array
+      // Also make sure it matches the Note type
+      if (data && Array.isArray(data)) {
+        setNotes(data as Note[]);
+      } else {
+        setNotes([]);
+      }
     } catch (error: any) {
       console.error('Error loading notes:', error);
       toast({
@@ -57,6 +62,8 @@ const DataManagement = () => {
         description: error.message,
         variant: 'destructive',
       });
+      // If there's an error, set notes to empty array
+      setNotes([]);
     }
   };
 
